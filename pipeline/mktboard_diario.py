@@ -28,7 +28,7 @@ import pandas as pd
 import requests
 
 warnings.filterwarnings("ignore")
-VERSION = "1.1"
+VERSION = "1.2"
 RAIZ = pathlib.Path(__file__).resolve().parents[1]
 DATA = RAIZ / "data"
 DATA.mkdir(exist_ok=True)
@@ -268,7 +268,10 @@ def s_emae():
 
 
 def d9_hist(tipo: str, tk: str) -> pd.Series:
-    return a_serie(get_json(f"{D9}/historical/{tipo}/{tk}"), "date", "c").loc[DESDE:]
+    j = get_json(f"{D9}/historical/{tipo}/{tk}")
+    if not isinstance(j, list):          # p. ej. {"Error": "...no tengo ese ticker..."}
+        raise ValueError(f"data912 no tiene {tipo}/{tk}: {str(j)[:80]}")
+    return a_serie(j, "date", "c").loc[DESDE:]
 
 
 @fuente("Acciones panel líder · data912")
@@ -284,10 +287,30 @@ def s_panel():
     return pd.DataFrame(cols).sort_index() if cols else None
 
 
-@fuente("CEDEARs SPY y GLD · data912")
-def s_cedears():
-    cols = {tk: d9_hist("cedears", tk) for tk in CANASTA_CEDEAR}
-    return pd.DataFrame(cols).sort_index()
+CED_ORIGEN: dict[str, str] = {}
+
+
+@fuente("CEDEARs SPY y GLD · data912 (o subyacente × CCL)")
+def s_cedears(ccl):
+    """Precio del CEDEAR en data912. Si no está (GLD no tiene historia ahí), se arma por arbitraje:
+    subyacente en dólares (Yahoo) × CCL. Mide lo mismo salvo la prima/descuento propia de cada CEDEAR (±1–3%)."""
+    cols = {}
+    for tk in CANASTA_CEDEAR:
+        try:
+            s = d9_hist("cedears", tk)
+            if len(s) > 200:
+                cols[tk], CED_ORIGEN[tk] = s, "data912"
+                continue
+        except Exception:  # noqa: BLE001
+            pass
+        if ccl is None or not len(ccl):
+            continue
+        und = yahoo(tk)
+        fx = ccl.reindex(ccl.index.union(und.index)).sort_index().ffill().reindex(und.index)
+        sint = (und * fx).dropna()
+        if len(sint) > 200:
+            cols[tk], CED_ORIGEN[tk] = sint, "Yahoo × CCL"
+    return pd.DataFrame(cols).sort_index() if set(cols) == set(CANASTA_CEDEAR) else None
 
 
 @fuente("Bonos AL30D y GD30D · data912")
@@ -591,7 +614,7 @@ def main():
     cand = [(n, x) for n, x in (("BADLAR", badlar), ("TAMAR", tamar)) if x is not None and len(x)]
     tasa_nom, tasa_hist = max(cand, key=lambda c: len(c[1])) if cand else (None, None)
     emae = s_emae()
-    panel, ceds, bonos = s_panel(), s_cedears(), s_bonos_usd()
+    panel, ceds, bonos = s_panel(), s_cedears(ccl), s_bonos_usd()
     ust, spx, vix, ewz = s_ust(), s_spx(), s_vix(), s_ewz()
     vivo, cfg = s_vivo(), s_config()
 
@@ -716,8 +739,10 @@ def main():
                                "brecha_z": round(float(bz.loc[sc.index[-1]]), 3),
                                "bancos_z": round(float(ez.loc[sc.index[-1]]), 3),
                                "serie": serie_corta(sc)}
-                    var("riskoff", "Risk-off score", "Argentina · riesgo y dólar", sc, "score", "baja",
-                        "cálculo propio", 2, "abs", nota="Describe el estado; no anticipa (ya medido).")
+                    var("riskoff", "Risk-off (estrés contra los últimos 90 días)", "Argentina · riesgo y dólar", sc,
+                        "score", "baja", "cálculo propio", 2, "abs",
+                        nota=("Mide qué tan rápido se deterioró algo respecto de los últimos 90 días, no el nivel: "
+                              "puede dar alto con riesgo país y brecha en niveles normales. Describe; no anticipa."))
 
     # ── Índices de las clases de activo (en pesos, diarios) ──────────
     cal = pd.bdate_range(HOY - pd.DateOffset(years=3), HOY)
@@ -746,7 +771,8 @@ def main():
         clases_px["usd"] = al_cal(mep)
     CLASES = [
         {"id": "acc", "nombre": "Acciones AR", "proxy": "Panel líder equiponderado (21 papeles, data912)"},
-        {"id": "ced", "nombre": "CEDEARs", "proxy": "Canasta 70% SPY / 30% GLD (CEDEARs, data912)"},
+        {"id": "ced", "nombre": "CEDEARs", "proxy": "Canasta 70% SPY / 30% GLD en pesos ("
+         + (", ".join(f"{t}: {o}" for t, o in CED_ORIGEN.items()) or "sin datos") + ")"},
         {"id": "rfp", "nombre": "Renta fija en pesos", "proxy": f"Pesos capitalizando a {tasa_nom or 'tasa'} (proxy de plazo fijo y LECAP corta)"},
         {"id": "rfu", "nombre": "Renta fija en dólares", "proxy": "Promedio AL30D y GD30D (data912)"},
         {"id": "usd", "nombre": "Dólar", "proxy": "Dólar MEP"},
