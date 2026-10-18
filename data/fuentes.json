@@ -1,0 +1,129 @@
+{
+ "generado": "2026-10-18T10:30-03:00",
+ "fuentes": {
+  "Riesgo país · argentinadatos": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 0.3
+  },
+  "Dólar CCL · argentinadatos": {
+   "ok": true,
+   "ultimo": "2026-10-17",
+   "seg": 0.2
+  },
+  "Dólar MEP · argentinadatos": {
+   "ok": true,
+   "ultimo": "2026-10-17",
+   "seg": 0.4
+  },
+  "Dólar oficial · argentinadatos": {
+   "ok": true,
+   "ultimo": "2026-10-17",
+   "seg": 1.1
+  },
+  "Inflación INDEC · argentinadatos": {
+   "ok": true,
+   "ultimo": "2026-09-30",
+   "seg": 0.2
+  },
+  "REM · argentinadatos (o el último guardado)": {
+   "ok": false,
+   "error": "RuntimeError: argentinadatos devolvió el REM vacío y todavía no hay uno guardado",
+   "seg": 0.2
+  },
+  "Confianza en el Gobierno · argentinadatos": {
+   "ok": true,
+   "ultimo": "2026-09-01",
+   "seg": 0.2
+  },
+  "Dólar mayorista · BCRA": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 1.7
+  },
+  "CER · BCRA": {
+   "ok": true,
+   "ultimo": "2026-10-18",
+   "seg": 0.9
+  },
+  "TAMAR bancos privados · BCRA": {
+   "ok": true,
+   "ultimo": "2026-10-15",
+   "seg": 0.8
+  },
+  "Reservas · BCRA": {
+   "ok": true,
+   "ultimo": "2026-10-14",
+   "seg": 0.9
+  },
+  "Compras netas de divisas · BCRA": {
+   "ok": true,
+   "ultimo": "2026-10-13",
+   "seg": 0.8
+  },
+  "Préstamos al sector privado en pesos · BCRA": {
+   "ok": true,
+   "ultimo": "2026-10-13",
+   "seg": 0.8
+  },
+  "BADLAR bancos privados · BCRA": {
+   "ok": true,
+   "ultimo": "2026-10-15",
+   "seg": 0.8
+  },
+  "EMAE · datos.gob.ar (INDEC)": {
+   "ok": true,
+   "ultimo": "2026-07-01",
+   "seg": 0.3
+  },
+  "Acciones panel líder · data912": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 14.5
+  },
+  "CEDEARs SPY y GLD · data912": {
+   "ok": false,
+   "error": "AttributeError: 'str' object has no attribute 'get'",
+   "seg": 0.8
+  },
+  "Bonos AL30D y GD30D · data912": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 0.9
+  },
+  "Treasuries 1, 2 y 10 años · FRED o Tesoro de EE.UU.": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 57.8
+  },
+  "S&P 500 · Yahoo": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 0.4
+  },
+  "VIX · Yahoo": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 0.1
+  },
+  "Brasil (EWZ) · Yahoo": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 0.2
+  },
+  "Precios en vivo de letras y bonos · data912": {
+   "ok": true,
+   "ultimo": null,
+   "seg": 0.7
+  },
+  "Pagos finales de LECAP · rendimientos-ar": {
+   "ok": true,
+   "ultimo": null,
+   "seg": 0.1
+  },
+  "Cálculos de mercado (LECAP, LELINK, AO27/AO28)": {
+   "ok": true,
+   "ultimo": "2026-10-18"
+  }
+ }
+}
