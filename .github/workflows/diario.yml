@@ -16,11 +16,13 @@ concurrency:
 
 jobs:
   correr:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04   # fijo: ubuntu-latest pasa a 26.04 desde el 19/10/2026
     timeout-minutes: 25
     steps:
       - name: Bajar el repositorio
-       uses: actions/checkout@v7
+        uses: actions/checkout@v7
+        with:
+          ref: main          # la versión más nueva al arrancar, no la del momento en que se pidió la corrida
 
       - name: Preparar Python
         uses: actions/setup-python@v7
@@ -41,7 +43,14 @@ jobs:
           git add data/
           if git diff --cached --quiet; then
             echo "Sin cambios en los datos."
-          else
-            git commit -m "datos $(date -u +%F)"
-            git push
+            exit 0
           fi
+          git commit -m "datos $(date -u +%F)"
+          for intento in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "El repositorio cambió mientras corría: traigo lo nuevo y reintento ($intento/3)."
+            # en un rebase, "theirs" es el commit propio: quedan los datos recién calculados
+            git pull --rebase -X theirs origin main || { git rebase --abort; git pull --no-rebase -X ours origin main; }
+            sleep 5
+          done
+          exit 1
