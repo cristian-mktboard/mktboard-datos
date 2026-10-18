@@ -28,7 +28,7 @@ import pandas as pd
 import requests
 
 warnings.filterwarnings("ignore")
-VERSION = "1.0"
+VERSION = "1.1"
 RAIZ = pathlib.Path(__file__).resolve().parents[1]
 DATA = RAIZ / "data"
 DATA.mkdir(exist_ok=True)
@@ -152,10 +152,26 @@ def s_ipc():
     return a_serie(get_json(f"{AD}/finanzas/indices/inflacion"), "fecha", "valor")
 
 
-@fuente("REM · argentinadatos")
+@fuente("REM · argentinadatos (o el último guardado)")
 def s_rem():
+    """El endpoint a veces devuelve [] (pasó el 18/10/2026). Se guarda cada REM bueno en data/rem.json
+    y, si la API viene vacía, se usa el último guardado avisando de qué informe es."""
+    cache = DATA / "rem.json"
+    try:
+        nuevo = _rem_api()
+        if nuevo["ipc"]:
+            cache.write_text(json.dumps(nuevo, ensure_ascii=False, indent=1), encoding="utf-8")
+            return {**nuevo, "origen": "api"}
+    except Exception:  # noqa: BLE001
+        pass
+    if cache.exists():
+        return {**json.loads(cache.read_text(encoding="utf-8")), "origen": "guardado"}
+    raise RuntimeError("argentinadatos devolvió el REM vacío y todavía no hay uno guardado")
+
+
+def _rem_api():
     arr = get_json(f"{AD}/finanzas/rem/ultimo")
-    arr = arr if isinstance(arr, list) else arr.get("datos", [])
+    arr = arr if isinstance(arr, list) else (arr or {}).get("datos", [])
     filas = [x for x in arr if not x.get("muestra") or "todos" in str(x.get("muestra")).lower()]
     def pick(clave, excluir=None):
         out = []
@@ -286,7 +302,7 @@ def s_bonos_usd():
 
 
 def fred(serie_id: str) -> pd.Series:
-    txt = http_get(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={serie_id}").text
+    txt = http_get(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={serie_id}", intentos=2, timeout=25).text
     df = pd.read_csv(io.StringIO(txt))
     fcol = df.columns[0]
     s = pd.to_numeric(df[serie_id], errors="coerce")
@@ -294,9 +310,26 @@ def fred(serie_id: str) -> pd.Series:
     return s.dropna().loc[DESDE:]
 
 
-@fuente("Treasuries 1, 2 y 10 años · FRED")
+def tesoro_eeuu() -> pd.DataFrame:
+    """Curva diaria del Tesoro de EE.UU. (misma base que FRED/H.15), un CSV por año."""
+    partes = []
+    for y in range(int(DESDE[:4]), HOY.year + 1):
+        url = ("https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/"
+               f"{y}/all?type=daily_treasury_yield_curve&field_tdr_date_value={y}&page&_format=csv")
+        df = pd.read_csv(io.StringIO(http_get(url, intentos=2, timeout=30).text))
+        df.index = pd.to_datetime(df["Date"], format="%m/%d/%Y")
+        partes.append(df[["1 Yr", "2 Yr", "10 Yr"]].apply(pd.to_numeric, errors="coerce"))
+    d = pd.concat(partes).sort_index()
+    d.columns = ["ust1", "ust2", "ust10"]
+    return d[~d.index.duplicated(keep="last")].dropna().loc[DESDE:]
+
+
+@fuente("Treasuries 1, 2 y 10 años · FRED o Tesoro de EE.UU.")
 def s_ust():
-    return pd.DataFrame({"ust1": fred("DGS1"), "ust2": fred("DGS2"), "ust10": fred("DGS10")})
+    try:
+        return pd.DataFrame({"ust1": fred("DGS1"), "ust2": fred("DGS2"), "ust10": fred("DGS10")})
+    except Exception:  # noqa: BLE001  — FRED suele cortar conexiones desde servidores en la nube
+        return tesoro_eeuu()
 
 
 def yahoo(tk: str) -> pd.Series:
@@ -610,15 +643,26 @@ def main():
     rem_prox = None
     if rem and rem.get("ipc"):
         mes = HOY.replace(day=1).date().isoformat()
-        cand = [x for x in rem["ipc"] if x.get("tipo") == "mensual" and x.get("desde", "") >= mes]
-        rem_prox = sorted(cand, key=lambda x: x["desde"])[0] if cand else None
+        mens = [x for x in rem["ipc"] if x.get("tipo") == "mensual" and x.get("desde") and x.get("mediana") is not None]
+        cand = [x for x in mens if x["desde"] >= mes]
+        rem_prox = (sorted(cand, key=lambda x: x["desde"])[0] if cand
+                    else (sorted(mens, key=lambda x: x["desde"])[-1] if mens else None))
     if rem_prox:
         V[-1]["rem"] = rem_prox
-    if tem90 is not None and rem_prox and rem_prox.get("mediana") is not None:
-        V.append({"id": "tasa_real", "nombre": "Tasa real esperada (LECAP − REM)", "grupo": "Pesos · tasa e inflación",
-                  "unidad": "pp/mes", "fav": None, "fuente": "cálculo propio", "dec": 2,
-                  "valor": round(tem90 * 100 - float(rem_prox["mediana"]), 3), "sin_historia": True,
-                  "nota": "Positiva: los pesos le ganan a la inflación esperada."})
+    infl_ref, expost = None, False
+    if rem_prox and rem_prox.get("mediana") is not None:
+        infl_ref = float(rem_prox["mediana"])
+    elif ipc is not None and len(ipc):
+        infl_ref, expost = float(ipc.iloc[-1]), True      # sin REM: contra el último dato publicado
+    if tem90 is not None and infl_ref is not None:
+        V.append({"id": "tasa_real",
+                  "nombre": "Tasa real (LECAP − último IPC)" if expost else "Tasa real esperada (LECAP − REM)",
+                  "grupo": "Pesos · tasa e inflación", "unidad": "pp/mes", "fav": None, "fuente": "cálculo propio",
+                  "dec": 2, "valor": round(tem90 * 100 - infl_ref, 3), "sin_historia": True, "expost": expost,
+                  "nota": ("Sin REM disponible: se compara con la inflación pasada, no con la esperada. "
+                           if expost else (f"REM {rem_prox.get('periodo')}"
+                                           + (" (informe guardado). " if rem and rem.get("origen") == "guardado" else ". ")))
+                          + "Positiva: los pesos le ganan a la inflación."})
     if mk.get("deval_impl_90d") is not None:
         V.append({"id": "deval90", "nombre": "Devaluación implícita a 90 días", "grupo": "Pesos · tasa e inflación",
                   "unidad": "%", "fav": "baja", "fuente": "LELINK vs. LECAP (data912)", "dec": 1,
@@ -781,13 +825,13 @@ def main():
     out = {
         "version": VERSION,
         "generado": AHORA.isoformat(timespec="minutes"),
+        "fuentes": FUENTES,          # primero: es lo que se mira cuando algo falla
         "variables": V,
         "clases": CLASES,
         "sensibilidades": sensib,
         "riskoff": riskoff,
         "mercado": {k: v for k, v in mk.items()},
         "rem": rem,
-        "fuentes": FUENTES,
     }
     def limpio(o):
         if isinstance(o, float):
@@ -804,11 +848,13 @@ def main():
             return bool(o)
         return o
     (DATA / "contexto.json").write_text(json.dumps(limpio(out), ensure_ascii=False), encoding="utf-8")
+    (DATA / "fuentes.json").write_text(json.dumps(limpio({"generado": out["generado"], "fuentes": FUENTES}),
+                                                  ensure_ascii=False, indent=1), encoding="utf-8")
 
     # Historial: una fila por día (si se corre dos veces el mismo día, se reemplaza)
     fila = {"fecha": str(HOY.date()), "generado": out["generado"]}
     for v in V:
-        if v.get("valor") is not None:
+        if v.get("valor") is not None and not v.get("expost"):   # no mezclar definiciones en la historia
             fila[v["id"]] = v["valor"]
     for k in ("lecap_tem_90d", "fx_impl_90d", "ao27_tir", "ao28_tir", "fwd_post_eleccion", "spread_fwd_pb"):
         if mk.get(k) is not None:
