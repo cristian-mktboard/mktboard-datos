@@ -1,5 +1,5 @@
 {
- "generado": "2026-10-18T10:30-03:00",
+ "generado": "2026-10-18T10:49-03:00",
  "fuentes": {
   "Riesgo país · argentinadatos": {
    "ok": true,
@@ -14,12 +14,12 @@
   "Dólar MEP · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-17",
-   "seg": 0.4
+   "seg": 0.2
   },
   "Dólar oficial · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-17",
-   "seg": 1.1
+   "seg": 0.4
   },
   "Inflación INDEC · argentinadatos": {
    "ok": true,
@@ -29,7 +29,7 @@
   "REM · argentinadatos (o el último guardado)": {
    "ok": false,
    "error": "RuntimeError: argentinadatos devolvió el REM vacío y todavía no hay uno guardado",
-   "seg": 0.2
+   "seg": 0.4
   },
   "Confianza en el Gobierno · argentinadatos": {
    "ok": true,
@@ -39,12 +39,12 @@
   "Dólar mayorista · BCRA": {
    "ok": true,
    "ultimo": "2026-10-16",
-   "seg": 1.7
+   "seg": 1.9
   },
   "CER · BCRA": {
    "ok": true,
    "ultimo": "2026-10-18",
-   "seg": 0.9
+   "seg": 1.1
   },
   "TAMAR bancos privados · BCRA": {
    "ok": true,
@@ -54,12 +54,12 @@
   "Reservas · BCRA": {
    "ok": true,
    "ultimo": "2026-10-14",
-   "seg": 0.9
+   "seg": 0.8
   },
   "Compras netas de divisas · BCRA": {
    "ok": true,
    "ultimo": "2026-10-13",
-   "seg": 0.8
+   "seg": 0.9
   },
   "Préstamos al sector privado en pesos · BCRA": {
    "ok": true,
@@ -69,37 +69,37 @@
   "BADLAR bancos privados · BCRA": {
    "ok": true,
    "ultimo": "2026-10-15",
-   "seg": 0.8
+   "seg": 0.7
   },
   "EMAE · datos.gob.ar (INDEC)": {
    "ok": true,
    "ultimo": "2026-07-01",
-   "seg": 0.3
+   "seg": 1.8
   },
   "Acciones panel líder · data912": {
    "ok": true,
    "ultimo": "2026-10-16",
-   "seg": 14.5
+   "seg": 16.3
   },
-  "CEDEARs SPY y GLD · data912": {
-   "ok": false,
-   "error": "AttributeError: 'str' object has no attribute 'get'",
-   "seg": 0.8
+  "CEDEARs SPY y GLD · data912 (o subyacente × CCL)": {
+   "ok": true,
+   "ultimo": "2026-10-16",
+   "seg": 1.4
   },
   "Bonos AL30D y GD30D · data912": {
    "ok": true,
    "ultimo": "2026-10-16",
-   "seg": 0.9
+   "seg": 1.0
   },
   "Treasuries 1, 2 y 10 años · FRED o Tesoro de EE.UU.": {
    "ok": true,
    "ultimo": "2026-10-16",
-   "seg": 57.8
+   "seg": 57.9
   },
   "S&P 500 · Yahoo": {
    "ok": true,
    "ultimo": "2026-10-16",
-   "seg": 0.4
+   "seg": 0.1
   },
   "VIX · Yahoo": {
    "ok": true,
@@ -114,7 +114,7 @@
   "Precios en vivo de letras y bonos · data912": {
    "ok": true,
    "ultimo": null,
-   "seg": 0.7
+   "seg": 0.8
   },
   "Pagos finales de LECAP · rendimientos-ar": {
    "ok": true,
