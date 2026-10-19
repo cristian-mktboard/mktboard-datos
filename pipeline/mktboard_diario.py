@@ -28,7 +28,7 @@ import pandas as pd
 import requests
 
 warnings.filterwarnings("ignore")
-VERSION = "1.3"
+VERSION = "1.4"
 RAIZ = pathlib.Path(__file__).resolve().parents[1]
 DATA = RAIZ / "data"
 DATA.mkdir(exist_ok=True)
@@ -646,6 +646,9 @@ def main():
                   "cambio_1s": None if mensual else cambio(s, 7, modo_cambio),
                   "cambio_1m": cambio(s, 30 if not mensual else 20, modo_cambio),  # mensual: contra el dato anterior
                   "modo_cambio": modo_cambio, "pctl_3a": percentil(s), "mensual": mensual,
+                  # el tablero elige la ventana (1, 2 o 3 años); n = cuántos datos tiene cada una
+                  "pctl": {str(a): percentil(s, a) for a in (1, 2, 3)},
+                  "pctl_n": {str(a): int(len(s.loc[s.index[-1] - pd.DateOffset(years=a):])) for a in (1, 2, 3)},
                   "serie": serie_corta(s, mensual), "nota": nota})
 
     var("rp", "Riesgo país", "Argentina · riesgo y dólar", rp, "pb", "baja", "argentinadatos (JP Morgan EMBI)", 0, "abs")
