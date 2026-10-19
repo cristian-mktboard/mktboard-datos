@@ -28,7 +28,7 @@ import pandas as pd
 import requests
 
 warnings.filterwarnings("ignore")
-VERSION = "1.2"
+VERSION = "1.3"
 RAIZ = pathlib.Path(__file__).resolve().parents[1]
 DATA = RAIZ / "data"
 DATA.mkdir(exist_ok=True)
@@ -152,7 +152,10 @@ def s_ipc():
     return a_serie(get_json(f"{AD}/finanzas/indices/inflacion"), "fecha", "valor")
 
 
-@fuente("REM · argentinadatos (o el último guardado)")
+REM_FUENTE = "REM · argentinadatos (o el último guardado)"
+
+
+@fuente(REM_FUENTE)
 def s_rem():
     """El endpoint a veces devuelve [] (pasó el 18/10/2026). Se guarda cada REM bueno en data/rem.json
     y, si la API viene vacía, se usa el último guardado avisando de qué informe es."""
@@ -608,6 +611,10 @@ def ols(y: pd.Series, x: pd.Series):
 def main():
     rp, ccl, mep, ofi = s_riesgo(), s_ccl(), s_mep(), s_oficial()
     ipc, rem, icg = s_ipc(), s_rem(), s_icg()
+    if rem and rem.get("origen") == "guardado" and REM_FUENTE in FUENTES:
+        edad = (HOY - pd.Timestamp(str(rem.get("fecha") or "2000-01-01")[:10])).days
+        FUENTES[REM_FUENTE]["aviso"] = (f"API vacía: se usa el REM guardado, publicado el {str(rem.get('fecha'))[:10]}"
+                                        + (f" (hace {edad} días: probablemente ya salió uno nuevo)" if edad > 40 else ""))
     may, cer, tamar, reservas, compras, prest = s_mayorista(), s_cer(), s_tamar(), s_reservas(), s_compras(), s_prestamos()
     badlar = s_badlar()
     # Para medir sensibilidades hace falta historia larga: se usa la tasa con más datos (BADLAR o TAMAR)
@@ -663,18 +670,26 @@ def main():
               "nota": "La historia se arma con los días que corre este proceso."})
     var("ipc", "Inflación mensual (IPC)", "Pesos · tasa e inflación", ipc, "%", "baja", "INDEC vía argentinadatos", 1, "abs",
         mensual=True)
-    rem_prox = None
+    rem_prox, rem_3m = None, []
     if rem and rem.get("ipc"):
         mes = HOY.replace(day=1).date().isoformat()
         mens = [x for x in rem["ipc"] if x.get("tipo") == "mensual" and x.get("desde") and x.get("mediana") is not None]
         cand = [x for x in mens if x["desde"] >= mes]
         rem_prox = (sorted(cand, key=lambda x: x["desde"])[0] if cand
                     else (sorted(mens, key=lambda x: x["desde"])[-1] if mens else None))
+        rem_3m = sorted(cand, key=lambda x: x["desde"])[:3]   # la LECAP de 90 días cubre ~3 meses
     if rem_prox:
+        rem_prox = {**rem_prox, "origen": rem.get("origen"), "publicado": rem.get("fecha")}
         V[-1]["rem"] = rem_prox
-    infl_ref, expost = None, False
-    if rem_prox and rem_prox.get("mediana") is not None:
-        infl_ref = float(rem_prox["mediana"])
+    infl_ref, expost, horizonte = None, False, ""
+    if rem_3m:
+        prod = 1.0
+        for x in rem_3m:
+            prod *= 1 + float(x["mediana"]) / 100
+        infl_ref = (prod ** (1 / len(rem_3m)) - 1) * 100       # promedio geométrico mensual, mismo plazo que la LECAP
+        horizonte = (f"{rem_3m[0]['periodo']} a {rem_3m[-1]['periodo']}" if len(rem_3m) > 1 else str(rem_3m[0]["periodo"]))
+    elif rem_prox and rem_prox.get("mediana") is not None:
+        infl_ref, horizonte = float(rem_prox["mediana"]), str(rem_prox.get("periodo"))
     elif ipc is not None and len(ipc):
         infl_ref, expost = float(ipc.iloc[-1]), True      # sin REM: contra el último dato publicado
     if tem90 is not None and infl_ref is not None:
@@ -683,7 +698,7 @@ def main():
                   "grupo": "Pesos · tasa e inflación", "unidad": "pp/mes", "fav": None, "fuente": "cálculo propio",
                   "dec": 2, "valor": round(tem90 * 100 - infl_ref, 3), "sin_historia": True, "expost": expost,
                   "nota": ("Sin REM disponible: se compara con la inflación pasada, no con la esperada. "
-                           if expost else (f"REM {rem_prox.get('periodo')}"
+                           if expost else (f"REM {horizonte}, promedio mensual {infl_ref:.2f}%"
                                            + (" (informe guardado). " if rem and rem.get("origen") == "guardado" else ". ")))
                           + "Positiva: los pesos le ganan a la inflación."})
     if mk.get("deval_impl_90d") is not None:
