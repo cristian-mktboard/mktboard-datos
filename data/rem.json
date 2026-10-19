@@ -1,129 +1,176 @@
 {
  "informe": "2026-09",
- "fecha": "2026-10-06",
- "carga": "Manual: medianas del REM de septiembre de 2026 (relevado 28-30/9/2026, publicado 6/10/2026, 44 participantes), tomadas de El Cronista (6/10) e Infobae (13/10). Sin percentiles. El proceso lo reemplaza solo cuando argentinadatos vuelva a publicar el REM.",
+ "fecha": "2026-09-01",
  "ipc": [
   {
-   "periodo": "sep-26",
-   "tipo": "mensual",
-   "desde": "2026-09-01",
-   "mediana": 1.9,
-   "p10": null,
-   "p90": null
+   "periodo": "próx. 12 meses",
+   "tipo": "proximos_12_meses",
+   "desde": "",
+   "mediana": 21.1,
+   "p10": 17.7,
+   "p90": 24.5
   },
   {
-   "periodo": "oct-26",
-   "tipo": "mensual",
-   "desde": "2026-10-01",
-   "mediana": 1.7,
-   "p10": null,
-   "p90": null
-  },
-  {
-   "periodo": "nov-26",
-   "tipo": "mensual",
-   "desde": "2026-11-01",
-   "mediana": 1.6,
-   "p10": null,
-   "p90": null
-  },
-  {
-   "periodo": "dic-26",
-   "tipo": "mensual",
-   "desde": "2026-12-01",
-   "mediana": 1.8,
-   "p10": null,
-   "p90": null
-  },
-  {
-   "periodo": "ene-27",
-   "tipo": "mensual",
-   "desde": "2027-01-01",
-   "mediana": 1.6,
-   "p10": null,
-   "p90": null
-  },
-  {
-   "periodo": "feb-27",
-   "tipo": "mensual",
-   "desde": "2027-02-01",
-   "mediana": 1.6,
-   "p10": null,
-   "p90": null
-  },
-  {
-   "periodo": "mar-27",
-   "tipo": "mensual",
-   "desde": "2027-03-01",
-   "mediana": 1.7,
-   "p10": null,
-   "p90": null
+   "periodo": "próx. 24 meses",
+   "tipo": "proximos_24_meses",
+   "desde": "",
+   "mediana": 17.2,
+   "p10": 9.6,
+   "p90": 21.1
   },
   {
    "periodo": "2026",
    "tipo": "anual",
    "desde": "2026-01-01",
-   "mediana": 30.0,
-   "p10": null,
-   "p90": null
+   "mediana": 30,
+   "p10": 29.1,
+   "p90": 30.7
   },
   {
-   "periodo": "próximos 12 meses",
-   "tipo": "12 meses",
+   "periodo": "Sep-26",
+   "tipo": "mensual",
+   "desde": "2026-09-01",
+   "mediana": 1.9,
+   "p10": 1.6,
+   "p90": 2
+  },
+  {
+   "periodo": "Oct-26",
+   "tipo": "mensual",
    "desde": "2026-10-01",
-   "mediana": 21.1,
-   "p10": null,
-   "p90": null
+   "mediana": 1.7,
+   "p10": 1.6,
+   "p90": 1.9
+  },
+  {
+   "periodo": "Nov-26",
+   "tipo": "mensual",
+   "desde": "2026-11-01",
+   "mediana": 1.6,
+   "p10": 1.4,
+   "p90": 1.8
+  },
+  {
+   "periodo": "Dec-26",
+   "tipo": "mensual",
+   "desde": "2026-12-01",
+   "mediana": 1.8,
+   "p10": 1.5,
+   "p90": 2
+  },
+  {
+   "periodo": "2027",
+   "tipo": "anual",
+   "desde": "2027-01-01",
+   "mediana": 21.2,
+   "p10": 17.8,
+   "p90": 25.5
+  },
+  {
+   "periodo": "Jan-27",
+   "tipo": "mensual",
+   "desde": "2027-01-01",
+   "mediana": 1.6,
+   "p10": 1.3,
+   "p90": 2
+  },
+  {
+   "periodo": "Feb-27",
+   "tipo": "mensual",
+   "desde": "2027-02-01",
+   "mediana": 1.6,
+   "p10": 1.3,
+   "p90": 1.8
+  },
+  {
+   "periodo": "Mar-27",
+   "tipo": "mensual",
+   "desde": "2027-03-01",
+   "mediana": 1.7,
+   "p10": 1.4,
+   "p90": 2.2
+  },
+  {
+   "periodo": "2028",
+   "tipo": "anual",
+   "desde": "2028-01-01",
+   "mediana": 15,
+   "p10": 9.3,
+   "p90": 19.4
   }
  ],
  "tc": [
   {
-   "periodo": "oct-26",
+   "periodo": "próx. 12 meses",
+   "tipo": "proximos_12_meses",
+   "desde": "",
+   "mediana": 1945,
+   "p10": 1754,
+   "p90": 2080
+  },
+  {
+   "periodo": "2026",
+   "tipo": "anual",
+   "desde": "2026-01-01",
+   "mediana": 1614,
+   "p10": 1576,
+   "p90": 1664
+  },
+  {
+   "periodo": "Oct-26",
    "tipo": "mensual",
    "desde": "2026-10-01",
    "mediana": 1545,
-   "p10": null,
-   "p90": null
+   "p10": 1536,
+   "p90": 1576
   },
   {
-   "periodo": "nov-26",
+   "periodo": "Nov-26",
    "tipo": "mensual",
    "desde": "2026-11-01",
    "mediana": 1580,
-   "p10": null,
-   "p90": null
+   "p10": 1560,
+   "p90": 1622
   },
   {
-   "periodo": "dic-26",
+   "periodo": "Dec-26",
    "tipo": "mensual",
    "desde": "2026-12-01",
    "mediana": 1614,
-   "p10": null,
-   "p90": null
+   "p10": 1576,
+   "p90": 1664
   },
   {
-   "periodo": "ene-27",
+   "periodo": "2027",
+   "tipo": "anual",
+   "desde": "2027-01-01",
+   "mediana": 2009,
+   "p10": 1836,
+   "p90": 2146
+  },
+  {
+   "periodo": "Jan-27",
    "tipo": "mensual",
    "desde": "2027-01-01",
    "mediana": 1644,
-   "p10": null,
-   "p90": null
+   "p10": 1600,
+   "p90": 1715
   },
   {
-   "periodo": "feb-27",
+   "periodo": "Feb-27",
    "tipo": "mensual",
    "desde": "2027-02-01",
    "mediana": 1672,
-   "p10": null,
-   "p90": null
+   "p10": 1624,
+   "p90": 1751
   },
   {
-   "periodo": "mar-27",
+   "periodo": "Mar-27",
    "tipo": "mensual",
    "desde": "2027-03-01",
    "mediana": 1704,
-   "p10": null,
-   "p90": null
+   "p10": 1645,
+   "p90": 1788
   }
  ]
 }
