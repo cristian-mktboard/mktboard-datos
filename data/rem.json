@@ -1,0 +1,129 @@
+{
+ "informe": "2026-09",
+ "fecha": "2026-10-06",
+ "carga": "Manual: medianas del REM de septiembre de 2026 (relevado 28-30/9/2026, publicado 6/10/2026, 44 participantes), tomadas de El Cronista (6/10) e Infobae (13/10). Sin percentiles. El proceso lo reemplaza solo cuando argentinadatos vuelva a publicar el REM.",
+ "ipc": [
+  {
+   "periodo": "sep-26",
+   "tipo": "mensual",
+   "desde": "2026-09-01",
+   "mediana": 1.9,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "oct-26",
+   "tipo": "mensual",
+   "desde": "2026-10-01",
+   "mediana": 1.7,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "nov-26",
+   "tipo": "mensual",
+   "desde": "2026-11-01",
+   "mediana": 1.6,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "dic-26",
+   "tipo": "mensual",
+   "desde": "2026-12-01",
+   "mediana": 1.8,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "ene-27",
+   "tipo": "mensual",
+   "desde": "2027-01-01",
+   "mediana": 1.6,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "feb-27",
+   "tipo": "mensual",
+   "desde": "2027-02-01",
+   "mediana": 1.6,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "mar-27",
+   "tipo": "mensual",
+   "desde": "2027-03-01",
+   "mediana": 1.7,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "2026",
+   "tipo": "anual",
+   "desde": "2026-01-01",
+   "mediana": 30.0,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "próximos 12 meses",
+   "tipo": "12 meses",
+   "desde": "2026-10-01",
+   "mediana": 21.1,
+   "p10": null,
+   "p90": null
+  }
+ ],
+ "tc": [
+  {
+   "periodo": "oct-26",
+   "tipo": "mensual",
+   "desde": "2026-10-01",
+   "mediana": 1545,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "nov-26",
+   "tipo": "mensual",
+   "desde": "2026-11-01",
+   "mediana": 1580,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "dic-26",
+   "tipo": "mensual",
+   "desde": "2026-12-01",
+   "mediana": 1614,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "ene-27",
+   "tipo": "mensual",
+   "desde": "2027-01-01",
+   "mediana": 1644,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "feb-27",
+   "tipo": "mensual",
+   "desde": "2027-02-01",
+   "mediana": 1672,
+   "p10": null,
+   "p90": null
+  },
+  {
+   "periodo": "mar-27",
+   "tipo": "mensual",
+   "desde": "2027-03-01",
+   "mediana": 1704,
+   "p10": null,
+   "p90": null
+  }
+ ]
+}
