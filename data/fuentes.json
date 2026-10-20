@@ -1,25 +1,25 @@
 {
- "generado": "2026-10-20T16:13-03:00",
+ "generado": "2026-10-20T19:19-03:00",
  "fuentes": {
   "Riesgo país · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-19",
-   "seg": 0.3
+   "seg": 0.6
   },
   "Dólar CCL · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 0.4
+   "seg": 0.6
   },
   "Dólar MEP · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 0.2
+   "seg": 0.6
   },
   "Dólar oficial · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 0.4
+   "seg": 0.5
   },
   "Inflación INDEC · argentinadatos": {
    "ok": true,
@@ -29,17 +29,17 @@
   "REM · argentinadatos (o el último guardado)": {
    "ok": true,
    "ultimo": "2026-09-01",
-   "seg": 0.4
+   "seg": 0.2
   },
   "Confianza en el Gobierno · argentinadatos": {
    "ok": true,
    "ultimo": "2026-09-01",
-   "seg": 0.4
+   "seg": 0.2
   },
   "Dólar mayorista · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-19",
-   "seg": 1.2
+   "ultimo": "2026-10-20",
+   "seg": 2.2
   },
   "CER · BCRA": {
    "ok": true,
@@ -48,53 +48,53 @@
   },
   "TAMAR bancos privados · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-16",
-   "seg": 0.3
+   "ultimo": "2026-10-19",
+   "seg": 0.9
   },
   "Reservas · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-15",
-   "seg": 0.3
+   "ultimo": "2026-10-16",
+   "seg": 0.9
   },
   "Compras netas de divisas · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-14",
-   "seg": 0.3
+   "ultimo": "2026-10-15",
+   "seg": 0.4
   },
   "Préstamos al sector privado en pesos · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-14",
-   "seg": 0.7
+   "ultimo": "2026-10-15",
+   "seg": 0.4
   },
   "BADLAR bancos privados · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-16",
-   "seg": 0.3
+   "ultimo": "2026-10-19",
+   "seg": 0.5
   },
   "EMAE · datos.gob.ar (INDEC)": {
    "ok": true,
    "ultimo": "2026-07-01",
-   "seg": 0.9
+   "seg": 1.5
   },
   "Acciones panel líder · data912": {
    "ok": true,
-   "ultimo": "2026-10-19",
-   "seg": 9.1
+   "ultimo": "2026-10-20",
+   "seg": 20.3
   },
   "CEDEARs SPY y GLD · data912 (o subyacente × CCL)": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 0.8
+   "seg": 2.2
   },
   "Bonos AL30D y GD30D · data912": {
    "ok": true,
-   "ultimo": "2026-10-19",
+   "ultimo": "2026-10-20",
    "seg": 0.2
   },
   "Treasuries 3 meses a 10 años · FRED o Tesoro de EE.UU.": {
    "ok": true,
-   "ultimo": "2026-10-19",
-   "seg": 57.0
+   "ultimo": "2026-10-20",
+   "seg": 59.7
   },
   "S&P 500 · Yahoo": {
    "ok": true,
@@ -104,22 +104,22 @@
   "VIX · Yahoo": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 0.1
+   "seg": 0.3
   },
   "Brasil (EWZ) · Yahoo": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 0.3
+   "seg": 0.4
   },
   "Precios en vivo de letras y bonos · data912": {
    "ok": true,
    "ultimo": null,
-   "seg": 0.2
+   "seg": 1.1
   },
   "Pagos finales de LECAP · rendimientos-ar": {
    "ok": true,
    "ultimo": null,
-   "seg": 0.1
+   "seg": 0.4
   },
   "Cálculos de mercado (LECAP, LELINK, AO27/AO28)": {
    "ok": true,
@@ -128,22 +128,22 @@
   "Historia larga · S&P 500 (1927), VIX (1990) y oro (Yahoo)": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 0.6
+   "seg": 0.7
   },
   "ADRs argentinos · Yahoo (historia larga)": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 3.5
+   "seg": 4.7
   },
   "Historia larga · BADLAR y mayorista desde 2002 (BCRA)": {
    "ok": true,
-   "ultimo": "2026-10-19",
-   "seg": 3.5
+   "ultimo": "2026-10-20",
+   "seg": 3.8
   },
   "CER publicado por adelantado · BCRA": {
    "ok": true,
    "ultimo": "2026-11-15",
-   "seg": 0.7
+   "seg": 0.3
   },
   "Futuro: tasas base, mercado y episodios": {
    "ok": true,
