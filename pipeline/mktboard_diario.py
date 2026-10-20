@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MKTBOARD.AR · proceso diario · fase 1 (contexto + impacto)
+MKTBOARD.AR · proceso diario · fases 1 y 2 (contexto, impacto y futuro)
 
 Qué hace, en orden:
   1. Baja datos públicos: argentinadatos, BCRA (API v4.0), data912, datos.gob.ar, FRED y Yahoo (yfinance).
@@ -9,6 +9,8 @@ Qué hace, en orden:
      y mide su SENSIBILIDAD semanal a cada variable, en dólares (CCL) y en pesos reales (CER).
   4. Calcula el risk-off score y lo que descuenta el mercado (LECAP, LELINK, AO27/AO28).
   5. Escribe data/contexto.json (lo lee el tablero) y agrega una fila a data/historial.csv.
+  6. Fase 2 (futuro.py): lo que descuenta el mercado, tasas base de las 6 preguntas a 3 meses y episodios
+     parecidos a hoy. Escribe data/futuro.json.
 
 Cada fuente está aislada: si una falla, el resto sigue y el error queda registrado en "fuentes".
 Solo datos de mercado. Nada personal.
@@ -16,6 +18,7 @@ Solo datos de mercado. Nada personal.
 from __future__ import annotations
 
 import io
+import sys
 import json
 import math
 import time
@@ -28,7 +31,7 @@ import pandas as pd
 import requests
 
 warnings.filterwarnings("ignore")
-VERSION = "1.4"
+VERSION = "2.0"
 RAIZ = pathlib.Path(__file__).resolve().parents[1]
 DATA = RAIZ / "data"
 DATA.mkdir(exist_ok=True)
@@ -125,7 +128,7 @@ def fuente(nombre: str):
 # ════════════════════════════════════════════════════════════════════
 @fuente("Riesgo país · argentinadatos")
 def s_riesgo():
-    return a_serie(get_json(f"{AD}/finanzas/indices/riesgo-pais"), "fecha", "valor").loc[DESDE:]
+    return a_serie(get_json(f"{AD}/finanzas/indices/riesgo-pais"), "fecha", "valor")   # desde 1999: la fase 2 usa todo
 
 
 def _dolar(casa):
@@ -212,8 +215,8 @@ def id_bcra(regex: str, por_defecto: int) -> int:
     return por_defecto
 
 
-def bcra_serie(idv: int, desde: str = DESDE) -> pd.Series:
-    hasta = HOY.date().isoformat()
+def bcra_serie(idv: int, desde: str = DESDE, hasta: str | None = None) -> pd.Series:
+    hasta = hasta or HOY.date().isoformat()
     filas, off = [], 0
     for _ in range(10):
         j = get_json(f"{BCRA}/{idv}?desde={desde}&hasta={hasta}&limit=3000&offset={off}", bcra=True)
@@ -336,6 +339,10 @@ def fred(serie_id: str) -> pd.Series:
     return s.dropna().loc[DESDE:]
 
 
+COLS_UST = {"ust3m": ("DGS3MO", "3 Mo"), "ust6m": ("DGS6MO", "6 Mo"), "ust1": ("DGS1", "1 Yr"),
+            "ust2": ("DGS2", "2 Yr"), "ust10": ("DGS10", "10 Yr")}
+
+
 def tesoro_eeuu() -> pd.DataFrame:
     """Curva diaria del Tesoro de EE.UU. (misma base que FRED/H.15), un CSV por año."""
     partes = []
@@ -344,25 +351,37 @@ def tesoro_eeuu() -> pd.DataFrame:
                f"{y}/all?type=daily_treasury_yield_curve&field_tdr_date_value={y}&page&_format=csv")
         df = pd.read_csv(io.StringIO(http_get(url, intentos=2, timeout=30).text))
         df.index = pd.to_datetime(df["Date"], format="%m/%d/%Y")
-        partes.append(df[["1 Yr", "2 Yr", "10 Yr"]].apply(pd.to_numeric, errors="coerce"))
+        cols = {k: c for k, (_, c) in COLS_UST.items() if c in df.columns}
+        partes.append(df[list(cols.values())].apply(pd.to_numeric, errors="coerce").rename(columns={c: k for k, c in cols.items()}))
     d = pd.concat(partes).sort_index()
-    d.columns = ["ust1", "ust2", "ust10"]
-    return d[~d.index.duplicated(keep="last")].dropna().loc[DESDE:]
+    return d[~d.index.duplicated(keep="last")].dropna(subset=["ust1", "ust2", "ust10"]).loc[DESDE:]
 
 
-@fuente("Treasuries 1, 2 y 10 años · FRED o Tesoro de EE.UU.")
+@fuente("Treasuries 3 meses a 10 años · FRED o Tesoro de EE.UU.")
 def s_ust():
     try:
-        return pd.DataFrame({"ust1": fred("DGS1"), "ust2": fred("DGS2"), "ust10": fred("DGS10")})
+        return pd.DataFrame({k: fred(f) for k, (f, _) in COLS_UST.items()})
     except Exception:  # noqa: BLE001  — FRED suele cortar conexiones desde servidores en la nube
         return tesoro_eeuu()
 
 
-def yahoo(tk: str) -> pd.Series:
+def yahoo(tk: str, largo: bool = False) -> pd.Series:
     import yfinance as yf
-    h = yf.Ticker(tk).history(period="5y", auto_adjust=True)["Close"]
+    h, ultimo = None, None
+    for i in range(3):                                 # Yahoo a veces limita pedidos desde servidores en la nube
+        try:
+            h = yf.Ticker(tk).history(period="max" if largo else "5y", auto_adjust=True)["Close"]
+            if len(h):
+                break
+        except Exception as e:  # noqa: BLE001
+            ultimo = e
+        time.sleep(2 * (i + 1))
+    if h is None or not len(h):
+        raise ultimo or ValueError(f"Yahoo sin datos para {tk}")
     h.index = pd.to_datetime(h.index).tz_localize(None).normalize()
-    return h[h > 0].loc[DESDE:]
+    h = h[h > 0]
+    h = h[~h.index.duplicated(keep="last")]
+    return h if largo else h.loc[DESDE:]
 
 
 @fuente("S&P 500 · Yahoo")
@@ -378,6 +397,59 @@ def s_vix():
 @fuente("Brasil (EWZ) · Yahoo")
 def s_ewz():
     return yahoo("EWZ")
+
+
+# ── Historia larga y datos de la fase 2 ────────────────────────────
+ADRS = ["GGAL", "YPF", "BMA", "PAM", "TEO", "TGS", "EDN", "CRESY", "IRS", "BBAR", "SUPV", "LOMA", "CEPU"]
+ADR_USADOS: list[str] = []
+
+
+@fuente("Historia larga · S&P 500 (1927), VIX (1990) y oro (Yahoo)")
+def s_global_largo():
+    cols = {}
+    for k, tk in (("spx", "^GSPC"), ("vix", "^VIX"), ("oro", "GLD")):
+        try:
+            cols[k] = yahoo(tk, True)
+        except Exception:  # noqa: BLE001
+            continue
+    return pd.DataFrame(cols) if cols else None
+
+
+@fuente("ADRs argentinos · Yahoo (historia larga)")
+def s_adrs():
+    cols = {}
+    for tk in ADRS:
+        try:
+            s = yahoo(tk, True)
+            if len(s) > 500:
+                cols[tk] = s
+        except Exception:  # noqa: BLE001
+            continue
+    if len(cols) < 4:
+        return None
+    ADR_USADOS[:] = sorted(cols)
+    r = pd.DataFrame(cols).sort_index().pct_change(fill_method=None)
+    r = r.where(r.abs() < 0.5)                         # split o error de dato, no un retorno
+    return (1 + r.mean(axis=1).fillna(0)).cumprod()
+
+
+@fuente("Historia larga · BADLAR y mayorista desde 2002 (BCRA)")
+def s_bcra_largo():
+    cols = {}
+    for k, rx, i in (("badlar", r"badlar en pesos de bancos privados|badlar de bancos privados", 7),
+                     ("mayorista", r"tipo de cambio mayorista", 5)):
+        try:
+            cols[k] = bcra_serie(id_bcra(rx, i), desde="2002-01-01")
+        except Exception:  # noqa: BLE001
+            continue
+    return pd.DataFrame(cols) if cols else None
+
+
+@fuente("CER publicado por adelantado · BCRA")
+def s_cer_adelante():
+    return bcra_serie(id_bcra(r"coeficiente de estabilizaci", 30),
+                      desde=(HOY - pd.Timedelta(days=45)).date().isoformat(),
+                      hasta=(HOY + pd.Timedelta(days=60)).date().isoformat())
 
 
 @fuente("Precios en vivo de letras y bonos · data912")
@@ -609,7 +681,8 @@ def ols(y: pd.Series, x: pd.Series):
 # Principal
 # ════════════════════════════════════════════════════════════════════
 def main():
-    rp, ccl, mep, ofi = s_riesgo(), s_ccl(), s_mep(), s_oficial()
+    rp_largo, ccl, mep, ofi = s_riesgo(), s_ccl(), s_mep(), s_oficial()
+    rp = rp_largo.loc[DESDE:] if rp_largo is not None else None
     ipc, rem, icg = s_ipc(), s_rem(), s_icg()
     if rem and rem.get("origen") == "guardado" and REM_FUENTE in FUENTES:
         edad = (HOY - pd.Timestamp(str(rem.get("fecha") or "2000-01-01")[:10])).days
@@ -865,6 +938,28 @@ def main():
             mat[C["id"]] = fila
         sensib["unidades"][unidad] = mat
 
+    # ── Fase 2: futuro ────────────────────────────────────────────────
+    glob, adr, largo, cer_adel = s_global_largo(), s_adrs(), s_bcra_largo(), s_cer_adelante()
+    fut = None
+    try:
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+        import futuro
+        col = lambda df, c: df[c] if (df is not None and c in df) else None
+        fut = futuro.armar(hoy=HOY, liq=habil_siguiente(HOY), mk=mk, px=vivo, cfg=cfg, rp_largo=rp_largo, ipc=ipc,
+                           tamar=tamar, badlar_largo=col(largo, "badlar"), may=may, may_largo=col(largo, "mayorista"),
+                           cer_adel=cer_adel, ust=ust, spx_largo=col(glob, "spx"), vix_largo=col(glob, "vix"),
+                           oro_largo=col(glob, "oro"), adr=adr, rem=rem)
+        fut.update({"version": VERSION, "generado": AHORA.isoformat(timespec="minutes"), "adrs": ADR_USADOS})
+        avisos_f = ([f"solo {len(fut['preguntas'])} de 6 preguntas"] if len(fut["preguntas"]) < 6 else []) + fut["avisos"]
+        FUENTES["Futuro: tasas base, mercado y episodios"] = {
+            "ok": len(fut["preguntas"]) >= 4, "ultimo": str(HOY.date()),
+            **({"aviso": "; ".join(avisos_f)[:400]} if avisos_f else {}),
+            **({"error": "menos de 4 preguntas armadas"} if len(fut["preguntas"]) < 4 else {})}
+    except Exception as e:  # noqa: BLE001
+        import traceback
+        traceback.print_exc()
+        FUENTES["Futuro: tasas base, mercado y episodios"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:180]}"}
+
     # ── Salida ───────────────────────────────────────────────────────
     out = {
         "version": VERSION,
@@ -892,6 +987,8 @@ def main():
             return bool(o)
         return o
     (DATA / "contexto.json").write_text(json.dumps(limpio(out), ensure_ascii=False), encoding="utf-8")
+    if fut is not None:
+        (DATA / "futuro.json").write_text(json.dumps(limpio(fut), ensure_ascii=False), encoding="utf-8")
     (DATA / "fuentes.json").write_text(json.dumps(limpio({"generado": out["generado"], "fuentes": FUENTES}),
                                                   ensure_ascii=False, indent=1), encoding="utf-8")
 
