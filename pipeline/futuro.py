@@ -79,6 +79,14 @@ def resumen(x: pd.Series, criterio: str | None = None, minimo: int = 30, h: int 
             "media": round(float(x.mean()), 4), "desvio": round(float(x.std()), 4), "criterio": criterio}
 
 
+def sigma_robusta(r) -> float | None:
+    """Desvío equivalente a partir del rango intercuartil: no lo arrastran unas pocas crisis."""
+    if not r or not r.get("cuantiles"):
+        return None
+    q = r["cuantiles"]
+    return (q[75] - q[25]) / 1.349
+
+
 def tramo(v, corte):
     if v is None or (isinstance(v, float) and math.isnan(v)):
         return None
@@ -150,11 +158,15 @@ def curva_pesos(mk: dict, liq: pd.Timestamp):
         return None if t is None else (1 + t) ** (d / 30)
 
     fwd = []
-    for a, b in zip(curva, curva[1:]):
-        if b["dias"] - a["dias"] < 10:
-            continue
+    i = 0
+    while i < len(curva) - 1:                 # entre vencimientos cercanos el forward es ruido de precio: 45 días mínimo
+        j = next((k for k in range(i + 1, len(curva)) if curva[k]["dias"] - curva[i]["dias"] >= 45), None)
+        if j is None:
+            break
+        a, b = curva[i], curva[j]
         g = ((1 + b["tem"]) ** (b["dias"] / 30) / (1 + a["tem"]) ** (a["dias"] / 30)) ** (30 / (b["dias"] - a["dias"])) - 1
         fwd.append({"desde": a["venc"], "hasta": b["venc"], "dias_desde": a["dias"], "dias_hasta": b["dias"], "tem": g})
+        i = j
     hoy_1m = tem_en(30)
     g91, g121 = crec(H), crec(H + 30)
     fwd_1m_3m = (g121 / g91 - 1) if (g91 and g121) else None
@@ -387,21 +399,20 @@ def armar(*, hoy, liq, mk, px, cfg, rp_largo, ipc, tamar, badlar_largo, may, may
             objetivo = ult_mes + 3                                    # el IPC que va a estar publicado al vencimiento
             fut = ipc_m.shift(-3).dropna()
             x_all = fut.copy()
-            tend = (ipc_m - ipc_m.shift(3)).reindex(fut.index)
-            t_hoy = float(ipc_m.iloc[-1] - ipc_m.iloc[-4])
+            prom12 = ipc_m.rolling(12).mean()
+            p12_hoy = float(prom12.iloc[-1])
             banda = (ipc_m.reindex(fut.index) - v0).abs() <= 0.4
-            tr = tramo(t_hoy, 0.2)
-            par = banda & tend.apply(lambda v: tramo(v, 0.2) == tr)
+            par = banda & ((prom12.reindex(fut.index) - p12_hoy).abs() <= 0.5)
             hist_t = resumen(fechas(x_all[banda]), f"meses con inflación entre {v0 - 0.4:.1f}% y {v0 + 0.4:.1f}% "
                                             f"(hoy {v0:.1f}%) · el IPC de 3 meses después", minimo=12, h=85)
-            hist_p = resumen(fechas(x_all[par]), {"sube": "además, la inflación venía subiendo (más de 0,2 pp en 3 meses)",
-                                          "baja": "además, la inflación venía bajando (más de 0,2 pp en 3 meses)",
-                                          "quieto": "además, la inflación venía estable (±0,2 pp en 3 meses)"}[tr],
+            hist_p = resumen(fechas(x_all[par]), f"además, el promedio de los 12 meses previos era parecido al de hoy "
+                                                 f"({p12_hoy:.1f}% ± 0,5): deja afuera las pausas de las épocas de inflación alta",
                              minimo=12, h=85)
             obj = str(objetivo)
             tramo_m = next((t for t in infl["tramos"] if mes_en(t["meses"], obj)), None) \
                 or next((b for b in infl["bonos"] if mes_en(b["meses"], obj)), None)
-            sig = max(0.15, float(hist_t["desvio"])) if hist_t else 0.4
+            base_sig = hist_p if (hist_p and hist_p["n_indep"] >= 8) else hist_t
+            sig = max(0.15, sigma_robusta(base_sig) or 0.4)
             mercado = None
             if tramo_m:
                 mercado = {"dist": "normal", "media": round(tramo_m["infl_mensual"], 3), "sigma": round(sig, 3),
@@ -419,7 +430,8 @@ def armar(*, hoy, liq, mk, px, cfg, rp_largo, ipc, tamar, badlar_largo, may, may
                       "historia": {"todos": hist_t, "parecidos": hist_p},
                       "mercado": mercado,
                       "mercado_nota": ("Inflación que iguala el rendimiento de LECAP y BONCER en los meses que cubre ese "
-                                       "tramo; el margen es el error típico histórico, no lo pone el mercado."
+                                       "tramo (promedio de varios meses, no solo el que se pregunta). El margen no lo pone "
+                                           "el mercado: es la dispersión típica de los casos históricos parecidos."
                                        if mercado else "No hay un BONCER cuyo CER cubra ese mes."),
                       "rem": rem_obj,
                       "resolucion": {"serie": [[str(i), round(float(v), 2)] for i, v in ipc_m.dropna().iloc[-24:].items()],
@@ -449,7 +461,7 @@ def armar(*, hoy, liq, mk, px, cfg, rp_largo, ipc, tamar, badlar_largo, may, may
             mercado = None
             if hoy_1m is not None and fwd_1m_3m is not None and hist_t:
                 mercado = {"dist": "normal", "media": round((fwd_1m_3m - hoy_1m) * 365 / 30 * 100, 3),
-                           "sigma": round(max(1.0, float(hist_t["desvio"])), 3),
+                           "sigma": round(max(1.0, sigma_robusta(hist_p if (hist_p and hist_p["n_indep"] >= 20) else hist_t)), 3),
                            "tem_hoy": hoy_1m, "tem_fwd": fwd_1m_3m}
             P.append({"id": "tasa", "nombre": "Tasa en pesos (TAMAR)" if len(tam) else "Tasa en pesos (BADLAR)",
                       "clase": "Renta fija en pesos", "tipo": "cambio", "unidad": "pp", "umbrales": [-3, 3], "dec": 1,
@@ -459,7 +471,9 @@ def armar(*, hoy, liq, mk, px, cfg, rp_largo, ipc, tamar, badlar_largo, may, may
                       "historia_nota": "La historia larga es de la BADLAR (la TAMAR existe desde 2024); se mueven casi igual.",
                       "mercado": mercado,
                       "mercado_nota": ("Cuánto cambia la tasa a 1 mes que descuenta la curva de LECAP para dentro de 3 meses, "
-                                       "pasada a TNA. El margen es el error típico histórico, no lo pone el mercado."
+                                       "pasada a TNA. Ojo: la tasa forward incluye una prima por plazo, así que exagera "
+                                           "la suba esperada cuando la curva tiene pendiente positiva. El margen es la "
+                                           "dispersión típica de los casos históricos parecidos, no lo pone el mercado."
                                        if mercado else "Sin curva de LECAP suficiente."),
                       "resolucion": {"serie": ultimos(base_tasa, dec=2),
                                      "regla": "Tasa 91 días después contra la del día del registro, en puntos."}})
