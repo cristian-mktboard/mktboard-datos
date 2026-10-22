@@ -1,25 +1,25 @@
 {
- "generado": "2026-10-21T19:19-03:00",
+ "generado": "2026-10-22T19:20-03:00",
  "fuentes": {
   "Riesgo país · argentinadatos": {
    "ok": true,
-   "ultimo": "2026-10-20",
-   "seg": 0.6
+   "ultimo": "2026-10-21",
+   "seg": 0.7
   },
   "Dólar CCL · argentinadatos": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 0.5
+   "ultimo": "2026-10-22",
+   "seg": 0.6
   },
   "Dólar MEP · argentinadatos": {
    "ok": true,
-   "ultimo": "2026-10-21",
+   "ultimo": "2026-10-22",
    "seg": 0.3
   },
   "Dólar oficial · argentinadatos": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 0.5
+   "ultimo": "2026-10-22",
+   "seg": 0.6
   },
   "Inflación INDEC · argentinadatos": {
    "ok": true,
@@ -29,22 +29,22 @@
   "REM · argentinadatos (o el último guardado)": {
    "ok": true,
    "ultimo": "2026-09-01",
-   "seg": 0.4
+   "seg": 0.3
   },
   "Confianza en el Gobierno · argentinadatos": {
    "ok": true,
    "ultimo": "2026-09-01",
-   "seg": 0.2
+   "seg": 0.6
   },
   "Dólar mayorista · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 1.6
+   "ultimo": "2026-10-22",
+   "seg": 2.2
   },
   "CER · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 1.2
+   "ultimo": "2026-10-22",
+   "seg": 0.4
   },
   "TAMAR bancos privados · BCRA": {
    "ok": true,
@@ -53,92 +53,92 @@
   },
   "Reservas · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-19",
+   "ultimo": "2026-10-20",
    "seg": 0.4
   },
   "Compras netas de divisas · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-16",
-   "seg": 0.4
+   "ultimo": "2026-10-19",
+   "seg": 1.0
   },
   "Préstamos al sector privado en pesos · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-16",
-   "seg": 0.9
+   "ultimo": "2026-10-19",
+   "seg": 0.4
   },
   "BADLAR bancos privados · BCRA": {
    "ok": true,
    "ultimo": "2026-10-20",
-   "seg": 0.4
+   "seg": 1.0
   },
   "EMAE · datos.gob.ar (INDEC)": {
    "ok": true,
    "ultimo": "2026-07-01",
-   "seg": 0.9
+   "seg": 1.5
   },
   "Acciones panel líder · data912": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 18.3
+   "ultimo": "2026-10-22",
+   "seg": 21.4
   },
   "CEDEARs SPY y GLD · data912 (o subyacente × CCL)": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 1.4
+   "ultimo": "2026-10-22",
+   "seg": 2.0
   },
   "Bonos AL30D y GD30D · data912": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 0.3
+   "ultimo": "2026-10-22",
+   "seg": 0.9
   },
   "Treasuries 3 meses a 10 años · FRED o Tesoro de EE.UU.": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 58.4
+   "ultimo": "2026-10-22",
+   "seg": 59.8
   },
   "S&P 500 · Yahoo": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 0.3
+   "ultimo": "2026-10-22",
+   "seg": 0.2
   },
   "VIX · Yahoo": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 0.3
+   "ultimo": "2026-10-22",
+   "seg": 0.2
   },
   "Brasil (EWZ) · Yahoo": {
    "ok": true,
-   "ultimo": "2026-10-21",
+   "ultimo": "2026-10-22",
    "seg": 0.3
   },
   "Precios en vivo de letras y bonos · data912": {
    "ok": true,
    "ultimo": null,
-   "seg": 0.2
+   "seg": 1.1
   },
   "Pagos finales de LECAP · rendimientos-ar": {
    "ok": true,
    "ultimo": null,
-   "seg": 0.1
+   "seg": 0.3
   },
   "Cálculos de mercado (LECAP, LELINK, AO27/AO28)": {
    "ok": true,
-   "ultimo": "2026-10-21"
+   "ultimo": "2026-10-22"
   },
   "Historia larga · S&P 500 (1927), VIX (1990) y oro (Yahoo)": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 0.9
+   "ultimo": "2026-10-22",
+   "seg": 0.7
   },
   "ADRs argentinos · Yahoo (historia larga)": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 4.8
+   "ultimo": "2026-10-22",
+   "seg": 4.4
   },
   "Historia larga · BADLAR y mayorista desde 2002 (BCRA)": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 4.7
+   "ultimo": "2026-10-22",
+   "seg": 4.1
   },
   "CER publicado por adelantado · BCRA": {
    "ok": true,
@@ -147,7 +147,7 @@
   },
   "Futuro: tasas base, mercado y episodios": {
    "ok": true,
-   "ultimo": "2026-10-21"
+   "ultimo": "2026-10-22"
   }
  }
 }
