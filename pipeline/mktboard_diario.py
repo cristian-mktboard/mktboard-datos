@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MKTBOARD.AR · proceso diario · fases 1 y 2 (contexto, impacto y futuro)
+MKTBOARD.AR · proceso diario · fases 1 a 3 (contexto, impacto, futuro y cartera)
 
 Qué hace, en orden:
   1. Baja datos públicos: argentinadatos, BCRA (API v4.0), data912, datos.gob.ar, FRED y Yahoo (yfinance).
@@ -11,6 +11,8 @@ Qué hace, en orden:
   5. Escribe data/contexto.json (lo lee el tablero) y agrega una fila a data/historial.csv.
   6. Fase 2 (futuro.py): lo que descuenta el mercado, tasas base de las 6 preguntas a 3 meses y episodios
      parecidos a hoy. Escribe data/futuro.json.
+  7. Fase 3 (cartera.py): series semanales desde 2002 de las 5 clases en dólares, el dólar libre y el CER, para que
+     el tablero calcule caídas máximas, la base y los escenarios. Escribe data/cartera.json. Nada personal.
 
 Cada fuente está aislada: si una falla, el resto sigue y el error queda registrado en "fuentes".
 Solo datos de mercado. Nada personal.
@@ -31,7 +33,7 @@ import pandas as pd
 import requests
 
 warnings.filterwarnings("ignore")
-VERSION = "2.0"
+VERSION = "3.0"
 RAIZ = pathlib.Path(__file__).resolve().parents[1]
 DATA = RAIZ / "data"
 DATA.mkdir(exist_ok=True)
@@ -404,10 +406,10 @@ ADRS = ["GGAL", "YPF", "BMA", "PAM", "TEO", "TGS", "EDN", "CRESY", "IRS", "BBAR"
 ADR_USADOS: list[str] = []
 
 
-@fuente("Historia larga · S&P 500 (1927), VIX (1990) y oro (Yahoo)")
+@fuente("Historia larga · S&P 500, SPY, VIX, oro y Treasury 10 años (Yahoo)")
 def s_global_largo():
     cols = {}
-    for k, tk in (("spx", "^GSPC"), ("vix", "^VIX"), ("oro", "GLD")):
+    for k, tk in (("spx", "^GSPC"), ("vix", "^VIX"), ("oro", "GLD"), ("spy", "SPY"), ("oro_fut", "GC=F"), ("tnx", "^TNX")):
         try:
             cols[k] = yahoo(tk, True)
         except Exception:  # noqa: BLE001
@@ -433,13 +435,24 @@ def s_adrs():
     return (1 + r.mean(axis=1).fillna(0)).cumprod()
 
 
-@fuente("Historia larga · BADLAR y mayorista desde 2002 (BCRA)")
+@fuente("Historia larga · BADLAR, mayorista y CER desde 2002 (BCRA)")
 def s_bcra_largo():
     cols = {}
     for k, rx, i in (("badlar", r"badlar en pesos de bancos privados|badlar de bancos privados", 7),
-                     ("mayorista", r"tipo de cambio mayorista", 5)):
+                     ("mayorista", r"tipo de cambio mayorista", 5), ("cer", r"coeficiente de estabilizaci", 30)):
         try:
             cols[k] = bcra_serie(id_bcra(rx, i), desde="2002-01-01")
+        except Exception:  # noqa: BLE001
+            continue
+    return pd.DataFrame(cols) if cols else None
+
+
+@fuente("Historia larga · dólar CCL y blue (argentinadatos)")
+def s_dolar_largo():
+    cols = {}
+    for k in ("contadoconliqui", "blue"):
+        try:
+            cols[k] = a_serie(get_json(f"{AD}/cotizaciones/dolares/{k}"), "fecha", "venta")
         except Exception:  # noqa: BLE001
             continue
     return pd.DataFrame(cols) if cols else None
@@ -960,6 +973,26 @@ def main():
         traceback.print_exc()
         FUENTES["Futuro: tasas base, mercado y episodios"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:180]}"}
 
+    # ── Fase 3: cartera ───────────────────────────────────────────────
+    dol = s_dolar_largo()
+    car = None
+    try:
+        import cartera
+        col = lambda df, c: df[c] if (df is not None and c in df) else None
+        car = cartera.armar(rp_largo=rp_largo, adr=adr, spy=col(glob, "spy"), spx=col(glob, "spx"),
+                            oro_gld=col(glob, "oro"), oro_fut=col(glob, "oro_fut"), tnx=col(glob, "tnx"),
+                            badlar=col(largo, "badlar"), may_largo=col(largo, "mayorista"),
+                            ccl_largo=col(dol, "contadoconliqui"), blue_largo=col(dol, "blue"),
+                            cer_largo=col(largo, "cer"))
+        car.update({"version": VERSION, "generado": AHORA.isoformat(timespec="minutes")})
+        FUENTES["Cartera: series semanales desde 2002"] = {
+            "ok": True, "ultimo": car["hasta"], **({"aviso": " ".join(car["notas"])[:300]} if car["notas"] else {}),
+            "desde": car["desde"]}
+    except Exception as e:  # noqa: BLE001
+        import traceback
+        traceback.print_exc()
+        FUENTES["Cartera: series semanales desde 2002"] = {"ok": False, "error": f"{type(e).__name__}: {str(e)[:180]}"}
+
     # ── Salida ───────────────────────────────────────────────────────
     out = {
         "version": VERSION,
@@ -989,6 +1022,8 @@ def main():
     (DATA / "contexto.json").write_text(json.dumps(limpio(out), ensure_ascii=False), encoding="utf-8")
     if fut is not None:
         (DATA / "futuro.json").write_text(json.dumps(limpio(fut), ensure_ascii=False), encoding="utf-8")
+    if car is not None:
+        (DATA / "cartera.json").write_text(json.dumps(limpio(car), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (DATA / "fuentes.json").write_text(json.dumps(limpio({"generado": out["generado"], "fuentes": FUENTES}),
                                                   ensure_ascii=False, indent=1), encoding="utf-8")
 
