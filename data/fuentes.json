@@ -1,30 +1,30 @@
 {
- "generado": "2026-10-27T08:40-03:00",
+ "generado": "2026-10-27T19:26-03:00",
  "fuentes": {
   "Riesgo país · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-26",
-   "seg": 0.2
+   "seg": 0.4
   },
   "Dólar CCL · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-27",
-   "seg": 0.2
+   "seg": 0.6
   },
   "Dólar MEP · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-27",
-   "seg": 0.4
+   "seg": 0.6
   },
   "Dólar oficial · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-27",
-   "seg": 0.2
+   "seg": 0.6
   },
   "Inflación INDEC · argentinadatos": {
    "ok": true,
    "ultimo": "2026-09-30",
-   "seg": 0.3
+   "seg": 0.2
   },
   "REM · argentinadatos (o el último guardado)": {
    "ok": true,
@@ -34,72 +34,72 @@
   "Confianza en el Gobierno · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-01",
-   "seg": 0.4
+   "seg": 0.5
   },
   "Dólar mayorista · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-26",
-   "seg": 0.8
+   "ultimo": "2026-10-27",
+   "seg": 1.6
   },
   "CER · BCRA": {
    "ok": true,
    "ultimo": "2026-10-27",
-   "seg": 0.5
+   "seg": 0.4
   },
   "TAMAR bancos privados · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-23",
-   "seg": 0.3
+   "ultimo": "2026-10-26",
+   "seg": 0.9
   },
   "Reservas · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-22",
-   "seg": 0.3
+   "ultimo": "2026-10-23",
+   "seg": 0.4
   },
   "Compras netas de divisas · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-21",
-   "seg": 0.5
+   "ultimo": "2026-10-22",
+   "seg": 0.6
   },
   "Préstamos al sector privado en pesos · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-21",
+   "ultimo": "2026-10-22",
    "seg": 0.4
   },
   "BADLAR bancos privados · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-23",
-   "seg": 0.3
+   "ultimo": "2026-10-26",
+   "seg": 0.4
   },
   "EMAE · datos.gob.ar (INDEC)": {
    "ok": true,
    "ultimo": "2026-07-01",
-   "seg": 0.8
+   "seg": 1.5
   },
   "Acciones panel líder · data912": {
    "ok": true,
-   "ultimo": "2026-10-26",
-   "seg": 2.1
+   "ultimo": "2026-10-27",
+   "seg": 21.1
   },
   "CEDEARs SPY y GLD · data912 (o subyacente × CCL)": {
    "ok": true,
-   "ultimo": "2026-10-26",
-   "seg": 0.7
+   "ultimo": "2026-10-27",
+   "seg": 2.4
   },
   "Bonos AL30D y GD30D · data912": {
    "ok": true,
-   "ultimo": "2026-10-26",
-   "seg": 0.1
+   "ultimo": "2026-10-27",
+   "seg": 0.8
   },
   "Treasuries 3 meses a 10 años · FRED o Tesoro de EE.UU.": {
    "ok": true,
-   "ultimo": "2026-10-26",
+   "ultimo": "2026-10-27",
    "seg": 57.8
   },
   "S&P 500 · Yahoo": {
    "ok": true,
-   "ultimo": "2026-10-26",
-   "seg": 0.1
+   "ultimo": "2026-10-27",
+   "seg": 0.2
   },
   "VIX · Yahoo": {
    "ok": true,
@@ -108,18 +108,18 @@
   },
   "Brasil (EWZ) · Yahoo": {
    "ok": true,
-   "ultimo": "2026-10-26",
+   "ultimo": "2026-10-27",
    "seg": 0.2
   },
   "Precios en vivo de letras y bonos · data912": {
    "ok": true,
    "ultimo": null,
-   "seg": 0.1
+   "seg": 0.2
   },
   "Pagos finales de LECAP · rendimientos-ar": {
    "ok": true,
    "ultimo": null,
-   "seg": 0.1
+   "seg": 0.2
   },
   "Cálculos de mercado (LECAP, LELINK, AO27/AO28)": {
    "ok": true,
@@ -128,22 +128,22 @@
   "Historia larga · S&P 500, SPY, VIX, oro y Treasury 10 años (Yahoo)": {
    "ok": true,
    "ultimo": "2026-10-27",
-   "seg": 1.4
+   "seg": 1.8
   },
   "ADRs argentinos · Yahoo (historia larga)": {
    "ok": true,
-   "ultimo": "2026-10-26",
-   "seg": 3.4
+   "ultimo": "2026-10-27",
+   "seg": 4.5
   },
   "Historia larga · BADLAR, mayorista y CER desde 2002 (BCRA)": {
    "ok": true,
    "ultimo": "2026-10-27",
-   "seg": 5.2
+   "seg": 6.1
   },
   "CER publicado por adelantado · BCRA": {
    "ok": true,
    "ultimo": "2026-11-15",
-   "seg": 0.2
+   "seg": 0.3
   },
   "Futuro: tasas base, mercado y episodios": {
    "ok": true,
@@ -152,11 +152,11 @@
   "Historia larga · dólar CCL y blue (argentinadatos)": {
    "ok": true,
    "ultimo": "2026-10-27",
-   "seg": 0.6
+   "seg": 1.2
   },
   "Cartera: series semanales desde 2002": {
    "ok": true,
-   "ultimo": "2026-10-26",
+   "ultimo": "2026-10-27",
    "desde": "2002-03-08"
   }
  }
