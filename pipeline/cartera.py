@@ -12,7 +12,8 @@ Proxies (largos, para que entren 2002, 2008, 2018-19, 2020 y 2023):
   ced  CEDEARs           70% SPY + 30% oro (GLD; antes de 2004, futuros de oro)
   rfp  Renta fija pesos  pesos capitalizando a la BADLAR (proxy de plazo fijo y LECAP corta)
   rfu  Renta fija USD    bono soberano modelo: 8 años, cupón 7%, rendimiento = Treasury 10 años + riesgo país,
-                         con piso de 30 (recupero) y sin cupón cuando el riesgo país pasa 3.000 (default)
+                         con piso de 30 (recupero), sin cupón cuando el riesgo país pasa 3.000 (default) y sin
+                         ganancia de precio en las semanas de los canjes de 2005 y 2020 (cambia el índice, no el bono)
   usd  Dólar             billete: 0% en dólares
 Todo es público. Tu cartera y tu bitácora nunca pasan por acá.
 """
@@ -33,26 +34,37 @@ def limpia(s):
     return s[~s.index.duplicated(keep="last")]
 
 
-def encadenar(fuentes: list, cal: pd.DatetimeIndex) -> pd.Series:
-    """Índice armado con los retornos de la mejor fuente disponible cada día (en orden de prioridad).
-    Cada fuente se completa hacia adelante dentro de su propio rango, así no se cuentan dos veces los días."""
-    rets = []
-    for s in fuentes:
-        s = limpia(s)
-        if len(s) < 2:
-            continue
-        x = s.reindex(cal.union(s.index)).sort_index().ffill().reindex(cal)
-        x[(cal < s.index[0]) | (cal > s.index[-1] + pd.Timedelta(days=7))] = np.nan
-        rets.append(np.log(x).diff())
-    if not rets:
+def encadenar(fuentes: list, cal: pd.DatetimeIndex, nombres: list | None = None, diag: dict | None = None) -> pd.Series:
+    """Índice armado con los movimientos de la mejor fuente disponible (en orden de prioridad).
+    Cada paso entre dos días con datos se mide con UNA sola fuente que tenga dato en los dos extremos: así una fuente
+    con datos salteados no mete escalones y el cambio de fuente no mete saltos por diferencias de nivel."""
+    series = [limpia(s) for s in fuentes]
+    nombres = nombres or [f"f{i}" for i in range(len(series))]
+    usadas = [(n, s) for n, s in zip(nombres, series) if len(s) >= 2]
+    if not usadas:
         return pd.Series(dtype=float)
-    r = rets[0]
-    for x in rets[1:]:
-        r = r.fillna(x)
-    r = r.fillna(0.0)
-    primero = min(limpia(s).index[0] for s in fuentes if len(limpia(s)) >= 2)
-    r[cal <= primero] = 0.0
-    return np.exp(r.cumsum())
+    X = pd.concat({n: s for n, s in usadas}, axis=1).sort_index()
+    X = X[X.notna().any(axis=1)]
+    lr = np.log(X / X.shift(1))                        # NaN si a la fuente le falta alguno de los dos extremos
+    paso = pd.Series(np.nan, index=X.index)
+    elegida = pd.Series(None, index=X.index, dtype=object)
+    for n, _ in usadas:                                # la primera fuente con los dos extremos manda
+        libre = paso.isna() & lr[n].notna()
+        paso[libre] = lr[n][libre]
+        elegida[libre] = n
+    sin = int(paso.iloc[1:].isna().sum())
+    idx = np.exp(paso.fillna(0.0).cumsum())
+    if diag is not None:
+        e = elegida.dropna()
+        diag["pasos_sin_fuente"] = sin
+        diag["por_anio"] = {str(y): {k: round(float(v), 3) for k, v in g.value_counts(normalize=True).items()}
+                            for y, g in e.groupby(e.index.year)}
+    return idx.reindex(cal.union(idx.index)).sort_index().ffill().reindex(cal)
+
+
+# Cambios de composición del índice de riesgo país tras los canjes de deuda (los bonos en default salen y entran los
+# nuevos): el salto del índice no es una ganancia para quien tenía los bonos, así que esas semanas no suman precio.
+CANJES = [("2005-06-01", "2005-07-15"), ("2020-09-01", "2020-09-30")]
 
 
 def precio_bono(y: np.ndarray) -> np.ndarray:
@@ -71,7 +83,8 @@ def armar(*, rp_largo, adr, spy, spx, oro_gld, oro_fut, tnx, badlar, may_largo, 
     notas = []
 
     # Dólar libre: CCL, si no hay blue, si no mayorista (antes del cepo eran casi lo mismo)
-    fx_i = encadenar([ccl_largo, blue_largo, may_largo], cal)
+    diag_fx = {}
+    fx_i = encadenar([ccl_largo, blue_largo, may_largo], cal, ["CCL", "blue", "mayorista"], diag_fx)
     ult = next((float(limpia(s).iloc[-1]) for s in (ccl_largo, blue_largo, may_largo) if len(limpia(s))), None)
     if not len(fx_i) or ult is None:
         raise ValueError("sin dólar para convertir")
@@ -110,7 +123,10 @@ def armar(*, rp_largo, adr, spy, spx, oro_gld, oro_fut, tnx, badlar, may_largo, 
     y = (ust.values / 100) + rp.values / 1e4
     P = precio_bono(y)
     cup = np.where(rp.values[:-1] < RP_DEFAULT, CUPON * 100 / 52 / P[:-1], 0.0)
-    r_rfu = np.r_[0.0, P[1:] / P[:-1] - 1 + cup]
+    precio = P[1:] / P[:-1] - 1
+    for a_, b_ in CANJES:
+        precio[(sem[1:] >= a_) & (sem[1:] <= b_)] = 0.0
+    r_rfu = np.r_[0.0, precio + cup]
     rfu = pd.Series(np.cumprod(1 + np.nan_to_num(r_rfu)), index=sem)
 
     usd = pd.Series(1.0, index=sem)
@@ -136,9 +152,11 @@ def armar(*, rp_largo, adr, spy, spx, oro_gld, oro_fut, tnx, badlar, may_largo, 
             "ced": "70% SPY + 30% oro (GLD; antes de 2004, futuros de oro), rebalanceado cada semana",
             "rfp": "Pesos capitalizando a la BADLAR de bancos privados (un plazo fijo minorista paga algo menos)",
             "rfu": "Bono soberano modelo de 8 años y cupón 7%: rinde Treasury 10 años + riesgo país; piso de 30 "
-                   "(lo que se recuperó en los defaults) y sin cupón con riesgo país arriba de 3.000",
+                   "(lo que se recuperó en los defaults), sin cupón con riesgo país arriba de 3.000 y sin ganancia de "
+                   "precio en los canjes de 2005 y 2020 (ahí cambia la composición del índice, no el valor del bono)",
             "usd": "Dólar billete: 0% en dólares",
         },
         "conversion": "En pesos reales: valor en dólares × dólar libre (CCL; antes, blue; antes de 2011, mayorista) ÷ CER.",
+        "fx_fuentes": diag_fx,
         "notas": notas,
     }
