@@ -1,30 +1,30 @@
 {
- "generado": "2026-10-29T19:29-03:00",
+ "generado": "2026-10-30T19:25-03:00",
  "fuentes": {
   "Riesgo país · argentinadatos": {
-   "ok": true,
-   "ultimo": "2026-10-28",
-   "seg": 0.4
-  },
-  "Dólar CCL · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-29",
    "seg": 0.6
   },
+  "Dólar CCL · argentinadatos": {
+   "ok": true,
+   "ultimo": "2026-10-30",
+   "seg": 0.5
+  },
   "Dólar MEP · argentinadatos": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 0.7
+   "ultimo": "2026-10-30",
+   "seg": 0.2
   },
   "Dólar oficial · argentinadatos": {
    "ok": true,
-   "ultimo": "2026-10-29",
+   "ultimo": "2026-10-30",
    "seg": 0.3
   },
   "Inflación INDEC · argentinadatos": {
    "ok": true,
    "ultimo": "2026-09-30",
-   "seg": 0.2
+   "seg": 0.7
   },
   "REM · argentinadatos (o el último guardado)": {
    "ok": true,
@@ -34,87 +34,87 @@
   "Confianza en el Gobierno · argentinadatos": {
    "ok": true,
    "ultimo": "2026-10-01",
-   "seg": 0.5
+   "seg": 0.2
   },
   "Dólar mayorista · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-29",
+   "ultimo": "2026-10-30",
    "seg": 1.7
   },
   "CER · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 0.5
+   "ultimo": "2026-10-30",
+   "seg": 0.6
   },
   "TAMAR bancos privados · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-28",
-   "seg": 1.0
+   "ultimo": "2026-10-29",
+   "seg": 0.3
   },
   "Reservas · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-27",
+   "ultimo": "2026-10-28",
    "seg": 0.4
   },
   "Compras netas de divisas · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-26",
-   "seg": 0.6
+   "ultimo": "2026-10-27",
+   "seg": 1.2
   },
   "Préstamos al sector privado en pesos · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-26",
-   "seg": 0.5
+   "ultimo": "2026-10-27",
+   "seg": 0.3
   },
   "BADLAR bancos privados · BCRA": {
    "ok": true,
-   "ultimo": "2026-10-28",
-   "seg": 0.5
+   "ultimo": "2026-10-29",
+   "seg": 0.3
   },
   "EMAE · datos.gob.ar (INDEC)": {
    "ok": true,
    "ultimo": "2026-07-01",
-   "seg": 1.6
+   "seg": 1.4
   },
   "Acciones panel líder · data912": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 22.7
+   "ultimo": "2026-10-30",
+   "seg": 5.3
   },
   "CEDEARs SPY y GLD · data912 (o subyacente × CCL)": {
    "ok": true,
-   "ultimo": "2026-10-29",
+   "ultimo": "2026-10-30",
    "seg": 1.4
   },
   "Bonos AL30D y GD30D · data912": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 0.2
+   "ultimo": "2026-10-30",
+   "seg": 0.1
   },
   "Treasuries 3 meses a 10 años · FRED o Tesoro de EE.UU.": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 58.5
+   "ultimo": "2026-10-30",
+   "seg": 58.1
   },
   "S&P 500 · Yahoo": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 0.2
+   "ultimo": "2026-10-30",
+   "seg": 0.1
   },
   "VIX · Yahoo": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 0.2
+   "ultimo": "2026-10-30",
+   "seg": 0.4
   },
   "Brasil (EWZ) · Yahoo": {
    "ok": true,
-   "ultimo": "2026-10-29",
+   "ultimo": "2026-10-30",
    "seg": 0.2
   },
   "Precios en vivo de letras y bonos · data912": {
    "ok": true,
    "ultimo": null,
-   "seg": 0.2
+   "seg": 0.1
   },
   "Pagos finales de LECAP · rendimientos-ar": {
    "ok": true,
@@ -123,22 +123,22 @@
   },
   "Cálculos de mercado (LECAP, LELINK, AO27/AO28)": {
    "ok": true,
-   "ultimo": "2026-10-29"
+   "ultimo": "2026-10-30"
   },
   "Historia larga · S&P 500, SPY, VIX, oro y Treasury 10 años (Yahoo)": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 1.5
+   "ultimo": "2026-10-30",
+   "seg": 1.6
   },
   "ADRs argentinos · Yahoo (historia larga)": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 3.4
+   "ultimo": "2026-10-30",
+   "seg": 3.3
   },
   "Historia larga · BADLAR, mayorista y CER desde 2002 (BCRA)": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 5.6
+   "ultimo": "2026-10-30",
+   "seg": 7.1
   },
   "CER publicado por adelantado · BCRA": {
    "ok": true,
@@ -147,16 +147,16 @@
   },
   "Futuro: tasas base, mercado y episodios": {
    "ok": true,
-   "ultimo": "2026-10-29"
+   "ultimo": "2026-10-30"
   },
   "Historia larga · dólar CCL y blue (argentinadatos)": {
    "ok": true,
-   "ultimo": "2026-10-29",
-   "seg": 0.6
+   "ultimo": "2026-10-30",
+   "seg": 0.5
   },
   "Cartera: series semanales desde 2002": {
    "ok": true,
-   "ultimo": "2026-10-29",
+   "ultimo": "2026-10-30",
    "desde": "2002-03-08"
   }
  }
