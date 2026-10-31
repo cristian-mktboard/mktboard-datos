@@ -34,12 +34,41 @@ def limpia(s):
     return s[~s.index.duplicated(keep="last")]
 
 
+def sin_escalones(s: pd.Series, umbral: float = 0.5) -> tuple[pd.Series, int]:
+    """Algunas series viejas vienen redondeadas (el blue de 2011-2012 está en pesos enteros: 4, 5, 6, 7) y quedan como
+    escalones: semanas planas y saltos de 17-25% en un día. En los años en que más de la mitad de los días la serie no
+    se mueve, se reemplaza por una curva suave que pasa por el promedio de cada mes (promediar valores redondeados
+    recupera bastante bien el valor de fondo). Los años con datos buenos no se tocan."""
+    s = limpia(s)
+    if len(s) < 40:
+        return s, 0
+    quieta = (s.diff() == 0).groupby(s.index.year).mean()
+    malos = set(quieta[quieta > umbral].index)
+    if not malos:
+        return s, 0
+    mal = pd.Series(s.index.year.isin(list(malos)), index=s.index)
+    anclas = {i: float(v) for i, v in s[~mal].items()}
+    for _, mes in s[mal].groupby([s[mal].index.year, s[mal].index.month]):
+        anclas[mes.index[len(mes) // 2]] = float(np.exp(np.log(mes).mean()))
+    ancla = pd.Series(anclas).sort_index()
+    ns = lambda idx: pd.DatetimeIndex(idx).as_unit("ns").asi8.astype(float)
+    interp = np.exp(np.interp(ns(s.index), ns(ancla.index), np.log(ancla.values.astype(float))))
+    out = s.copy()
+    out[mal.values] = interp[mal.values]
+    return out, int(mal.sum())
+
+
 def encadenar(fuentes: list, cal: pd.DatetimeIndex, nombres: list | None = None, diag: dict | None = None) -> pd.Series:
     """Índice armado con los movimientos de la mejor fuente disponible (en orden de prioridad).
     Cada paso entre dos días con datos se mide con UNA sola fuente que tenga dato en los dos extremos: así una fuente
     con datos salteados no mete escalones y el cambio de fuente no mete saltos por diferencias de nivel."""
-    series = [limpia(s) for s in fuentes]
-    nombres = nombres or [f"f{i}" for i in range(len(series))]
+    nombres = nombres or [f"f{i}" for i in range(len(fuentes))]
+    series, alisados = [], {}
+    for n, s in zip(nombres, fuentes):
+        x, k = sin_escalones(s)
+        series.append(x)
+        if k:
+            alisados[n] = k
     usadas = [(n, s) for n, s in zip(nombres, series) if len(s) >= 2]
     if not usadas:
         return pd.Series(dtype=float)
@@ -57,6 +86,7 @@ def encadenar(fuentes: list, cal: pd.DatetimeIndex, nombres: list | None = None,
     if diag is not None:
         e = elegida.dropna()
         diag["pasos_sin_fuente"] = sin
+        diag["datos_alisados"] = alisados
         diag["por_anio"] = {str(y): {k: round(float(v), 3) for k, v in g.value_counts(normalize=True).items()}
                             for y, g in e.groupby(e.index.year)}
     return idx.reindex(cal.union(idx.index)).sort_index().ffill().reindex(cal)
